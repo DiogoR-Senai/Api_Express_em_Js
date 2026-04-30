@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <title>Meu CRUD Express</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+      }
+      .usuario-card {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 5px 0;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gerenciar Usuários</h1>
+
+    <input type="text" id="nomeInput" placeholder="Nome do usuário" />
+    <button onclick="criarUsuario()">Adicionar</button>
+
+    <hr />
+
+    <div id="listaUsuarios"></div>
+
+    <script>
+      const API_URL = "http://localhost:3000/usuarios";
+
+      // FUNÇÃO GET (Listar)
+      async function carregarUsuarios() {
+        const res = await fetch(API_URL);
+        const dados = await res.json();
+
+        const lista = document.getElementById("listaUsuarios");
+        lista.innerHTML = ""; // Limpa a lista antes de carregar
+
+        dados.forEach((user) => {
+          lista.innerHTML += `
+                    <div class="usuario-card">
+                        <span><strong>${user.id}</strong> - ${user.nome}</span>
+                        <div>
+                            <button onclick="editarUsuario(${user.id})">Editar</button>
+                            <button onclick="deletarUsuario(${user.id})">Excluir</button>
+                        </div>
+                    </div>
+                `;
+        });
+      }
+
+      // FUNÇÃO POST (Criar)
+      async function criarUsuario() {
+        const nome = document.getElementById("nomeInput").value;
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome: nome }),
+        });
+        document.getElementById("nomeInput").value = ""; // Limpa o campo
+        carregarUsuarios(); // Atualiza a lista
+      }
+
+      // FUNÇÃO DELETE (Excluir)
+      async function deletarUsuario(id) {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        carregarUsuarios();
+      }
+
+      // FUNÇÃO PUT (Editar - Exemplo Simples)
+      async function editarUsuario(id) {
+        const novoNome = prompt("Digite o novo nome:");
+        if (novoNome) {
+          await fetch(`${API_URL}/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome: novoNome }),
+          });
+          carregarUsuarios();
+        }
+      }
+
+      // Inicia carregando a lista
+      carregarUsuarios();
+    </script>
+  </body>
+</html>
